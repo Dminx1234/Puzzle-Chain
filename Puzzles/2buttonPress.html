@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Solved Riddle</title>
+  <style>
+    body {
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .press-btn {
+      padding: 20px 40px;
+      font-size: 1em;
+      background: #0f0;
+      color: #000;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 0 30px #39ff14, 0 0 10px #0f0;
+      cursor: pointer;
+      font-weight: bold;
+      opacity: 0;
+      transition: opacity 0.5s, transform 0.2s, box-shadow 0.2s;
+    }
+    .press-btn:hover {
+      opacity: 1;
+      transform: scale(1.08);
+      box-shadow: 0 0 50px #39ff14, 0 0 20px #0f0;
+    }
+  </style>
+</head>
+<body>
+  <button class="press-btn" id="pressBtn">Press Me!</button>
+  <div id="errorMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  <script>
+
+const btn = document.getElementById('pressBtn');
+btn.addEventListener('click', function(e) {
+  window.location.href = '3snake.html';
+  e.stopPropagation(); // Prevent background click event
+});
+
+document.body.addEventListener('click', function(e) {
+  if (e.target === document.body) {
+    document.getElementById('errorMsg').style.display = '';
+    setTimeout(function() {
+      window.location.href = '../main.html';
+    }, 5000);
+  }
+});
+  </script>
+</body>
+</html>

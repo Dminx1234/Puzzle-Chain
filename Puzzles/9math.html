@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Find the Comma Puzzle</title>
+  <style>
+    body {
+      background: #000;
+      color: #39ff14;
+      font-family: monospace;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .instruction {
+      font-size: 2em;
+      margin: 32px 0 24px 0;
+      color: #39ff14;
+      text-shadow: 0 0 10px #39ff14;
+      text-align: center;
+    }
+    .dots-grid {
+      position: relative;
+      width: 90vw;
+      height: 640px;
+      margin: 0 auto;
+      background: none;
+      overflow: hidden;
+    }
+    .dot-btn {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      left: 0;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .dot-btn {
+      background: none;
+      border: none;
+      color: #39ff14;
+      font-size: 2em;
+      cursor: pointer;
+      padding: 0;
+      outline: none;
+      transition: color 0.1s;
+    }
+    .dot-btn:hover {
+      color: #0f0;
+      text-shadow: 0 0 8px #39ff14;
+    }
+  </style>
+</head>
+<body>
+  <div class="instruction">Click the comma!</div>
+  <div class="dots-grid" id="dotsGrid"></div>
+  <div id="logoutMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  <script>
+    function randomGreen() {
+      // Generate a random green tint in rgb
+      const g = 128 + Math.floor(Math.random() * 127); // 128-255
+      const r = Math.floor(Math.random() * 64); // 0-63
+      const b = Math.floor(Math.random() * 64); // 0-63
+      return `rgb(${r},${g},${b})`;
+    }
+    const grid = document.getElementById('dotsGrid');
+    const total = 128; // Lower for performance
+    let commaIdx = Math.floor(Math.random() * total);
+    let btns = [];
+    let dots = [];
+    const gridW = grid.offsetWidth;
+    const gridH = 640;
+    function createButtons() {
+      btns = [];
+      dots = [];
+      grid.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'dot-btn';
+        btn.style.color = randomGreen();
+        btn.style.left = Math.random() * (gridW - 32) + 'px';
+        btn.style.top = Math.random() * (gridH - 32) + 'px';
+        btns.push(btn);
+        grid.appendChild(btn);
+        dots.push({
+          x: parseFloat(btn.style.left),
+          y: parseFloat(btn.style.top),
+          vx: (Math.random() - 0.5) * 1.5,
+          vy: (Math.random() - 0.5) * 1.5
+        });
+      }
+      updateButtons();
+    }
+    function updateButtons() {
+      for (let i = 0; i < total; i++) {
+        btns[i].textContent = '.';
+        btns[i].onclick = () => {
+          document.getElementById('logoutMsg').style.display = '';
+          setTimeout(function() {
+            window.location.href = '../main.html';
+          }, 5000);
+        };
+      }
+      btns[commaIdx].textContent = ',';
+      btns[commaIdx].onclick = () => window.location.href = '10win.html';
+    }
+    createButtons();
+
+    function bounceDots() {
+      for (let i = 0; i < total; i++) {
+        let dot = dots[i];
+        dot.x += dot.vx;
+        dot.y += dot.vy;
+        // Wall bounce
+        if (dot.x < 0) { dot.x = 0; dot.vx *= -1; }
+        if (dot.x > gridW - 32) { dot.x = gridW - 32; dot.vx *= -1; }
+        if (dot.y < 0) { dot.y = 0; dot.vy *= -1; }
+        if (dot.y > gridH - 32) { dot.y = gridH - 32; dot.vy *= -1; }
+        // Collision bounce (simple)
+        for (let j = i + 1; j < total; j++) {
+          let dot2 = dots[j];
+          let dx = dot.x - dot2.x;
+          let dy = dot.y - dot2.y;
+          let dist = Math.sqrt(dx*dx + dy*dy);
+          if (dist < 32) {
+            // Swap velocities
+            let tempvx = dot.vx;
+            let tempvy = dot.vy;
+            dot.vx = dot2.vx;
+            dot.vy = dot2.vy;
+            dot2.vx = tempvx;
+            dot2.vy = tempvy;
+            // Move apart
+            let overlap = 32 - dist;
+            let angle = Math.atan2(dy, dx);
+            dot.x += Math.cos(angle) * overlap/2;
+            dot.y += Math.sin(angle) * overlap/2;
+            dot2.x -= Math.cos(angle) * overlap/2;
+            dot2.y -= Math.sin(angle) * overlap/2;
+          }
+        }
+        btns[i].style.left = dot.x + 'px';
+        btns[i].style.top = dot.y + 'px';
+      }
+    }
+    setInterval(bounceDots, 20);
+  </script>
+</body>
+</html>

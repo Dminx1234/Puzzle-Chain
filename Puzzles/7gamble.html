@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Gamble Puzzle - Guitar Hero Style</title>
+  <style>
+    body {
+      background: #000;
+      color: #39ff14;
+      font-family: monospace;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    h2 {
+      margin-top: 32px;
+      font-size: 2em;
+      color: #39ff14;
+      text-shadow: 0 0 10px #39ff14;
+      text-align: center;
+    }
+    .instructions {
+      font-size: 1.1em;
+      color: #0f0;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+    #gameCanvas {
+      background: #111;
+      border: 3px solid #39ff14;
+      border-radius: 12px;
+      box-shadow: 0 0 18px #39ff14;
+      margin: 0 auto;
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h2>Who's curiosities target?</h2>
+  <div class="instructions">Press <b>spacebar</b> when the correct letter is inside the box.</div>
+  <canvas id="gameCanvas" width="420" height="500"></canvas>
+  <div id="logoutMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const targetWord = ['c','a','t'];
+    const columns = 3;
+    const colWidth = canvas.width / columns;
+    const charHeight = 48;
+    const dropSpeed = 1.4; // Slow down falling letters
+    const boxY = 220; // Move boxes further down
+    const boxHeight = 54;
+    let locked = [false, false, false];
+    let lockedChars = [null, null, null];
+    let fallingChars = [];
+    let lastSpawn = 0;
+    let gameOver = false;
+    function randomChar() {
+      const pool = 'abcdefghijklmnopqrstuvwxyz';
+      return pool[Math.floor(Math.random()*pool.length)];
+    }
+    function weightedRandomChar(col) {
+      const pool = 'abcdefghijklmnopqrstuvwxyz';
+      const target = targetWord[col];
+      // 40% chance for target letter, 60% for random
+      if (Math.random() < 0.4) return target;
+      let ch;
+      do {
+        ch = pool[Math.floor(Math.random()*pool.length)];
+      } while (ch === target);
+      return ch;
+    }
+    function spawnChar(col) {
+      let y = -charHeight;
+      // If previous letter exists in this column, spawn just above it
+      const prev = fallingChars.filter(obj => obj.col === col);
+      if (prev.length) {
+        y = prev[prev.length-1].y - charHeight - 18;
+      }
+      fallingChars.push({
+        char: weightedRandomChar(col),
+        col: col,
+        y: y
+      });
+    }
+    // Initial spawn: three letters per column, spaced
+    for (let c = 0; c < columns; c++) {
+      for (let i = 0; i < 3; i++) spawnChar(c);
+    }
+    function draw() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      // Draw target boxes
+      for (let c = 0; c < columns; c++) {
+        ctx.save();
+        ctx.strokeStyle = '#39ff14';
+        ctx.lineWidth = 4;
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 10;
+        ctx.strokeRect(colWidth*c + 18, boxY, colWidth-36, boxHeight);
+        ctx.restore();
+        // Draw locked char
+        if (locked[c]) {
+          ctx.save();
+          ctx.font = 'bold 2.5em monospace';
+          ctx.fillStyle = '#39ff14';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.shadowColor = '#39ff14';
+          ctx.shadowBlur = 18;
+          ctx.fillText(lockedChars[c], colWidth*c + colWidth/2, boxY + boxHeight/2);
+          ctx.restore();
+        }
+      }
+      // Draw falling chars
+      fallingChars.forEach(obj => {
+        if (!locked[obj.col]) {
+          ctx.save();
+          ctx.font = '2.2em monospace';
+          ctx.fillStyle = '#0f0';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(obj.char, colWidth*obj.col + colWidth/2, obj.y);
+          ctx.restore();
+        }
+      });
+      // Draw indicator text
+      ctx.save();
+      ctx.font = '1.1em monospace';
+      ctx.fillStyle = '#39ff14';
+      ctx.textAlign = 'center';
+      
+      ctx.restore();
+    }
+    function update(ts) {
+      for (let i = fallingChars.length-1; i >= 0; i--) {
+        const obj = fallingChars[i];
+        if (!locked[obj.col]) {
+          obj.y += dropSpeed;
+          if (obj.y > canvas.height) {
+            // Remove and respawn
+            fallingChars.splice(i,1);
+            spawnChar(obj.col);
+          }
+        }
+      }
+      // Spawn new chars if last is far enough from top
+      for (let c = 0; c < columns; c++) {
+        if (!locked[c]) {
+          const colChars = fallingChars.filter(obj => obj.col === c);
+          if (colChars.length < 3) {
+            spawnChar(c);
+          } else {
+            const lastY = colChars[colChars.length-1].y;
+            if (lastY > charHeight + 30) {
+              spawnChar(c);
+            }
+          }
+        }
+      }
+    }
+    function checkWin() {
+      if (locked.every(Boolean)) {
+        let correct = true;
+        for (let i = 0; i < 3; i++) {
+          if (lockedChars[i].toLowerCase() !== targetWord[i]) correct = false;
+        }
+        if (correct) {
+          window.location.href = '8delete.html';
+        } else {
+          document.getElementById('logoutMsg').style.display = '';
+          setTimeout(function() {
+            window.location.href = '../main.html';
+          }, 5000);
+        }
+        gameOver = true;
+      }
+    }
+    document.addEventListener('keydown', function(e) {
+      if (gameOver) return;
+      if (e.code === 'Space') {
+        let col = locked.findIndex(l => !l);
+        if (col === -1) return;
+        // Find char in box in this column
+        let bestIdx = -1;
+        for (let i = 0; i < fallingChars.length; i++) {
+          let obj = fallingChars[i];
+          if (obj.col === col && obj.y >= boxY && obj.y <= boxY + boxHeight) {
+            bestIdx = i;
+            break;
+          }
+        }
+        if (bestIdx === -1) return;
+        locked[col] = true;
+        lockedChars[col] = fallingChars[bestIdx].char;
+        // Remove all falling chars in this column and respawn one
+        for (let i = fallingChars.length-1; i >= 0; i--) {
+          if (fallingChars[i].col === col) fallingChars.splice(i,1);
+        }
+        spawnChar(col);
+        checkWin();
+      }
+    });
+    function loop(ts) {
+      if (!gameOver) {
+        update(ts);
+        draw();
+        requestAnimationFrame(loop);
+      }
+    }
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

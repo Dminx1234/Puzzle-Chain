@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Riddle Challenge</title>
+  <style>
+    body {
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      margin: 0;
+      padding: 20px;
+    }
+    .riddle-container {
+      max-width: 800px;
+      margin: auto;
+      border: 2px solid #0f0;
+      padding: 40px;
+      border-radius: 10px;
+      background: #111;
+      box-shadow: 0 0 15px #0f0;
+      text-align: center;
+    }
+    .riddle-question {
+      font-size: 2.5em;
+      margin-bottom: 40px;
+      font-weight: bold;
+    }
+    .riddle-choice {
+      display: block;
+      margin: 20px auto;
+      padding: 20px 40px;
+      font-size: 1.5em;
+      background: #222;
+      color: #0f0;
+      border: 2px solid #0f0;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .riddle-choice:hover {
+      background: #0f0;
+      color: #000;
+    }
+  </style>
+</head>
+<body>
+  <div class="riddle-container">
+    <div class="riddle-question">I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?</div>
+    <button class="riddle-choice" onclick="wrong()">A Tree</button>
+    <button class="riddle-choice" onclick="wrong()">A Cloud</button>
+    <button class="riddle-choice" onclick="right()">An Echo</button>
+    <button class="riddle-choice" onclick="wrong()">A Shadow</button>
+    <div id="errorMsg" style="display:none; color:red; font-size:2.5em; font-weight:bold; margin-top:40px; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  </div>
+  <script>
+    function right() {
+      window.location.href = "2buttonPress.html";
+    }
+    function wrong() {
+      document.getElementById('errorMsg').style.display = '';
+      setTimeout(function() {
+        window.location.href = "../main.html";
+      }, 5000);
+    }
+  </script>
+</body>
+</html>

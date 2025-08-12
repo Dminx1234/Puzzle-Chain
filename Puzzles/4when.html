@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>When Puzzle</title>
+  <style>
+    body {
+      background: #000;
+      color: #39ff14;
+      font-family: monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .when-container {
+      background: #111;
+      border: 3px solid #39ff14;
+      border-radius: 16px;
+      box-shadow: 0 0 30px #39ff14;
+      padding: 60px 40px 40px 40px;
+      text-align: center;
+      min-width: 340px;
+    }
+    .when-title {
+      font-size: 4em;
+      font-weight: bold;
+      margin-bottom: 40px;
+      text-shadow: 0 0 30px #39ff14, 0 0 10px #0f0;
+    }
+    .when-input {
+      font-size: 2em;
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 2px solid #39ff14;
+      background: #000;
+      color: #39ff14;
+      margin-bottom: 24px;
+      width: 180px;
+      text-align: center;
+      outline: none;
+    }
+    .when-btn {
+      font-size: 1.5em;
+      padding: 12px 40px;
+      border-radius: 8px;
+      border: none;
+      background: #39ff14;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 20px #39ff14;
+      transition: background 0.2s, color 0.2s;
+    }
+    .when-btn:hover {
+      background: #0f0;
+      color: #000;
+    }
+    .error-msg {
+      color: red;
+      font-size: 1.2em;
+      margin-top: 18px;
+      min-height: 1.2em;
+    }
+  </style>
+</head>
+<body>
+  <div class="when-container">
+    <div class="when-title">When?</div>
+    <input class="when-input" id="whenInput" type="text" maxlength="5" placeholder="">
+    <br>
+    <button class="when-btn" id="whenBtn">Submit</button>
+    <div class="error-msg" id="errorMsg"></div>
+    <div id="logoutMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  </div>
+  <canvas id="timersCanvas" style="position:fixed; left:0; top:0; width:100vw; height:100vh; pointer-events:none; z-index:0;"></canvas>
+  <script>
+    function getLocalTimeString() {
+      const now = new Date();
+      let hours = now.getHours();
+      let minutes = now.getMinutes();
+      hours = hours % 12;
+      if (hours === 0) hours = 12;
+      let minStr = minutes < 10 ? '0' + minutes : '' + minutes;
+      return `${hours}:${minStr}`;
+    }
+    function parseTime(str) {
+      const m = str.match(/^(\d{1,2}):(\d{2})$/);
+      if (!m) return null;
+      let h = parseInt(m[1]);
+      let min = parseInt(m[2]);
+      if (h < 1 || h > 12 || min < 0 || min > 59) return null;
+      return {h, min};
+    }
+    function getNowObj() {
+      const now = new Date();
+      let h = now.getHours() % 12;
+      if (h === 0) h = 12;
+      let min = now.getMinutes();
+      return {h, min};
+    }
+    let failCount = 0;
+    document.getElementById('whenBtn').addEventListener('click', function() {
+      const input = document.getElementById('whenInput').value.trim();
+      const errorMsg = document.getElementById('errorMsg');
+      const parsed = parseTime(input);
+      if (!parsed) {
+        failCount++;
+        if (failCount >= 3) {
+          document.getElementById('logoutMsg').style.display = '';
+          errorMsg.textContent = '';
+          setTimeout(function() {
+            window.location.href = '../main.html';
+          }, 5000);
+        } else {
+          errorMsg.textContent = `Incorrect format! Tries left: ${3 - failCount}`;
+        }
+        return;
+      }
+      const now = getNowObj();
+      if (parsed.h === now.h && parsed.min === now.min) {
+        window.location.href = '5dropdown.html';
+      } else {
+        failCount++;
+        if (failCount >= 3) {
+          document.getElementById('logoutMsg').style.display = '';
+          errorMsg.textContent = '';
+          setTimeout(function() {
+            window.location.href = '../main.html';
+          }, 5000);
+        } else {
+          errorMsg.textContent = `Wrong time! Tries left: ${3 - failCount}`;
+        }
+      }
+    });
+    document.getElementById('whenInput').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        document.getElementById('whenBtn').click();
+      }
+    });
+    // Random countdown timers
+    const canvas = document.getElementById('timersCanvas');
+    const ctx = canvas.getContext('2d');
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    // Generate random timers, some count up, two show am/pm
+    const timers = [];
+    for (let i = 0; i < 12; i++) {
+      let x, y;
+      do {
+        x = Math.random() * canvas.width;
+        y = Math.random() * canvas.height;
+      } while (
+        x > canvas.width/2 - 220 && x < canvas.width/2 + 220 &&
+        y > canvas.height/2 - 180 && y < canvas.height/2 + 180
+      );
+      const seconds = Math.floor(Math.random()*300 + 10);
+      // 1/3 timers count up
+      const countUp = i < 4;
+      // Two timers show am/pm
+      const showAmPm = i === 2 || i === 7;
+      timers.push({x, y, seconds, countUp, showAmPm});
+    }
+    function drawTimers() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.font = '2em monospace';
+      ctx.globalAlpha = 0.7;
+      timers.forEach(t => {
+        let min = Math.floor(t.seconds/60);
+        let sec = t.seconds%60;
+        let txt = `${min}:${sec<10?'0':''}${sec}`;
+        if (t.showAmPm) {
+          txt += (Math.random() > 0.5 ? ' am' : ' pm');
+        }
+        ctx.fillStyle = '#39ff14';
+        ctx.shadowColor = '#39ff14';
+        ctx.shadowBlur = 18;
+        ctx.fillText(txt, t.x, t.y);
+      });
+      ctx.globalAlpha = 1;
+    }
+    function tickTimers() {
+      timers.forEach(t => {
+        if (t.countUp) {
+          t.seconds++;
+        } else {
+          if (t.seconds > 0) t.seconds--;
+        }
+      });
+    }
+    setInterval(() => { tickTimers(); drawTimers(); }, 1000);
+    drawTimers();
+  </script>
+</body>
+</html>

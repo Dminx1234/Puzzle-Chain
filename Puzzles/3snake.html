@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Snake Game</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+      margin: auto;
+      background: #111;
+      border: 4px solid #0f0;
+      border-radius: 10px;
+      box-shadow: 0 0 20px #0f0;
+    }
+    .arrow-heatmap {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      gap: 40px;
+    }
+    .arrow-key {
+      width: 60px;
+      height: 60px;
+      background: #222;
+      border: 2px solid #0f0;
+      border-radius: 10px;
+      color: #0f0;
+      font-size: 2em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px #0f0;
+      transition: background 0.1s, color 0.1s;
+    }
+    .arrow-key.active {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 20px #39ff14;
+    }
+    h1 {
+      text-align: center;
+      color: #39ff14;
+      margin-top: 20px;
+      font-size: 2em;
+      text-shadow: 0 0 10px #39ff14;
+    }
+  </style>
+</head>
+<body>
+  <h1>Snake</h1>
+  <div id="startHint" style="text-align:center;color:#39ff14;font-size:1.2em;margin-bottom:10px;text-shadow:0 0 8px #39ff14;">Press any ARROW KEY to start the game</div>
+  <div class="arrow-heatmap">
+    <div class="arrow-key" id="arrow-up">&#8593;</div>
+    <div class="arrow-key" id="arrow-left">&#8592;</div>
+    <div class="arrow-key" id="arrow-down">&#8595;</div>
+    <div class="arrow-key" id="arrow-right">&#8594;</div>
+  </div>
+  <canvas id="snake" width="400" height="400"></canvas>
+  <div id="errorMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  <script>
+    const canvas = document.getElementById('snake');
+    const ctx = canvas.getContext('2d');
+    const grid = 20;
+    let snake = [{x: 200, y: 200}];
+    let dx = grid;
+    let dy = 0;
+    let food = {x: 0, y: 0};
+    let score = 0;
+    let directionQueue = [];
+    let lastDirection = 'ArrowRight';
+    function placeFood() {
+      food.x = Math.floor(Math.random() * 20) * grid;
+      food.y = Math.floor(Math.random() * 20) * grid;
+    }
+    placeFood();
+    function draw() {
+      ctx.fillStyle = '#111';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      // Draw snake
+      ctx.fillStyle = '#0f0';
+      for (let s of snake) {
+        ctx.fillRect(s.x, s.y, grid, grid);
+      }
+      // Draw food
+      ctx.fillStyle = '#39ff14';
+      ctx.fillRect(food.x, food.y, grid, grid);
+      // Draw score
+      ctx.fillStyle = '#0f0';
+      ctx.font = '18px monospace';
+      ctx.fillText('Score: ' + score, 10, 390);
+    }
+    function updateDirection() {
+      if (directionQueue.length > 0) {
+        const dir = directionQueue.shift();
+        // Prevent direct reversal only
+        if (dir === 'ArrowUp' && lastDirection !== 'ArrowDown') { dx = 0; dy = -grid; lastDirection = dir; }
+        else if (dir === 'ArrowDown' && lastDirection !== 'ArrowUp') { dx = 0; dy = grid; lastDirection = dir; }
+        else if (dir === 'ArrowLeft' && lastDirection !== 'ArrowRight') { dx = -grid; dy = 0; lastDirection = dir; }
+        else if (dir === 'ArrowRight' && lastDirection !== 'ArrowLeft') { dx = grid; dy = 0; lastDirection = dir; }
+      }
+    }
+    function update() {
+      updateDirection();
+      let head = {x: snake[0].x + dx, y: snake[0].y + dy};
+      // Wall collision
+      if (head.x < 0 || head.x >= canvas.width || head.y < 0 || head.y >= canvas.height) {
+        reset();
+        return;
+      }
+      // Self collision
+      for (let s of snake) {
+        if (head.x === s.x && head.y === s.y) {
+          reset();
+          return;
+        }
+      }
+      snake.unshift(head);
+      // Food collision
+      if (head.x === food.x && head.y === food.y) {
+        score++;
+        placeFood();
+        if (score >= 5) {
+          window.location.href = '4when.html';
+        }
+      } else {
+        snake.pop();
+      }
+    }
+    function reset() {
+      snake = [{x: 200, y: 200}];
+      dx = grid;
+      dy = 0;
+      score = 0;
+      directionQueue = [];
+      lastDirection = 'ArrowRight';
+      placeFood();
+    }
+    // Heatmap logic
+    const arrowMap = {
+      'ArrowUp': document.getElementById('arrow-up'),
+      'ArrowDown': document.getElementById('arrow-down'),
+      'ArrowLeft': document.getElementById('arrow-left'),
+      'ArrowRight': document.getElementById('arrow-right')
+    };
+    document.addEventListener('keydown', function(e) {
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
+        directionQueue.push(e.key);
+        // Heatmap visual
+        arrowMap[e.key].classList.add('active');
+        setTimeout(() => arrowMap[e.key].classList.remove('active'), 120);
+      }
+    });
+    let lastFrame = 0;
+    const fps = 10; // 10 frames per second
+    function loop(ts) {
+      if (!lastFrame) lastFrame = ts;
+      if (ts - lastFrame > 1000 / fps) {
+        update();
+        draw();
+        lastFrame = ts;
+      }
+      requestAnimationFrame(loop);
+    }
+    let gameStarted = false;
+    let tries = 3;
+    const startHint = document.getElementById('startHint');
+
+    function startGame() {
+      if (!gameStarted && tries > 0) {
+        gameStarted = true;
+        requestAnimationFrame(loop);
+      }
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)) {
+        startGame();
+      }
+    });
+
+    function reset() {
+      tries--;
+      if (tries <= 0) {
+        document.getElementById('errorMsg').style.display = '';
+        startHint.style.display = 'none';
+        setTimeout(function() {
+          window.location.href = '../main.html';
+        }, 5000);
+        return;
+      }
+      snake = [{x: 200, y: 200}];
+      dx = grid;
+      dy = 0;
+      score = 0;
+      directionQueue = [];
+      lastDirection = 'ArrowRight';
+      placeFood();
+      gameStarted = false;
+      startHint.textContent = `Press any ARROW KEY to start the game (Tries left: ${tries})`;
+    }
+
+    // Initial hint
+startHint.textContent = `Press any ARROW KEY to start the game (Tries left: ${tries})`;
+  </script>
+</body>
+</html>

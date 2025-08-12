@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login Simulation + Keylogger Demo</title>
+  <style>
+    body {
+      background: #000;
+      color: #0f0;
+      font-family: monospace;
+      margin: 0;
+      padding: 20px;
+    }
+
+    .logger-container {
+      max-width: 800px;
+      margin: auto;
+      border: 2px solid #0f0;
+      padding: 20px;
+      border-radius: 10px;
+      background: #111;
+      box-shadow: 0 0 15px #0f0;
+    }
+
+    .fake-login {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .fake-login img {
+      width: 75px;
+      margin-bottom: 15px;
+    }
+
+    .fake-login input, .fake-login button {
+      width: 80%;
+      padding: 10px;
+      margin: 8px 0;
+      border: 1px solid #0f0;
+      background: #000;
+      color: #0f0;
+      font-size: 16px;
+      border-radius: 4px;
+    }
+
+    .fake-login button {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .keyboard {
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 5px;
+      margin-top: 20px;
+    }
+
+    .key {
+      border: 1px solid #0f0;
+      background: #111;
+      color: #0f0;
+      text-align: center;
+      line-height: 40px;
+      height: 40px;
+      border-radius: 4px;
+      transition: all 0.1s ease;
+      font-size: 14px;
+    }
+
+    .key.active {
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+    }
+
+    #log-output {
+      margin-top: 20px;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border-top: 1px solid #0f0;
+      padding-top: 10px;
+    }
+
+    #download-btn {
+      margin-top: 20px;
+      background: #0f0;
+      color: #000;
+      font-weight: bold;
+      padding: 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .warning {
+      color: red;
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="logger-container">
+  
+  <div class="fake-login">
+    <h2>Sign in</h2>
+    <input type="email" placeholder="Email or phone" id="email">
+    <input type="password" placeholder="Enter your password" id="password">
+    <button id="login-btn">Login</button>
+  </div>
+
+  <div id="log-output"></div>
+  <div class="keyboard" id="keyboard"></div>
+  <button id="download-btn">Download Session Log</button>
+</div>
+
+<script>
+  const logDiv = document.getElementById("log-output");
+  const keyboardDiv = document.getElementById("keyboard");
+  const downloadBtn = document.getElementById("download-btn");
+  // Login logic
+  document.getElementById("login-btn").addEventListener("click", function() {
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    if (email === "admin@admin" && password === "admin") {
+      window.location.href = "Puzzles/1riddlePuzzle.html";
+    } else {
+      alert("Incorrect password. Please try again.");
+    }
+  });
+
+let logData = `2:06:33 PM - a\n2:06:33 PM - d\n2:06:33 PM - m\n2:06:34 PM - i\n2:06:34 PM - n\n2:06:34 PM - Shift\n2:06:34 PM - @\n2:06:34 PM - a\n2:06:34 PM - d\n2:06:34 PM - m\n2:06:35 PM - i\n2:06:35 PM - n\n2:06:36 PM - a\n2:06:36 PM - d\n2:06:36 PM - m\n2:06:37 PM - i\n2:06:37 PM - n\n2:06:46 PM - Enter\n2:06:49 PM - u\n2:06:49 PM - s\n2:06:49 PM - e\n2:06:49 PM - r\n2:06:54 PM - p\n2:06:54 PM - a\n2:06:54 PM - s\n2:06:54 PM - s\n2:06:54 PM - w\n2:06:54 PM - o\n2:06:54 PM - r\n2:06:54 PM - d\n2:06:59 PM - Enter\n`;
+logDiv.textContent = logData;
+
+  const keyLayout = [
+    '`','1','2','3','4','5','6','7','8','9','0','-','=','Backspace',
+    'Tab','Q','W','E','R','T','Y','U','I','O','P','[',']','\\',
+    'CapsLock','A','S','D','F','G','H','J','K','L',';',"'",'Enter',
+    'Shift','Z','X','C','V','B','N','M',',','.','/','Shift',
+    'Ctrl','Meta','Alt','Space','Alt','Meta','Menu','Ctrl'
+  ];
+
+  const activeKeys = new Map();
+
+  // Render keyboard layout
+  keyLayout.forEach(k => {
+    const keyDiv = document.createElement("div");
+    keyDiv.className = "key";
+    keyDiv.dataset.key = k.toLowerCase();
+    keyDiv.innerText = k.length > 7 ? k.slice(0, 6) + "…" : k;
+    keyboardDiv.appendChild(keyDiv);
+  });
+
+  function highlightKey(key) {
+    const keyEl = document.querySelector(`.key[data-key="${key.toLowerCase()}"]`);
+    if (keyEl) {
+      keyEl.classList.add("active");
+      activeKeys.set(key.toLowerCase(), keyEl);
+    }
+  }
+
+  function unhighlightKey(key) {
+    const k = key.toLowerCase();
+    if (activeKeys.has(k)) {
+      activeKeys.get(k).classList.remove("active");
+      activeKeys.delete(k);
+    }
+  }
+
+  document.addEventListener("keydown", e => {
+    const k = e.key === " " ? "[SPACE]" : e.key;
+    const time = new Date().toLocaleTimeString();
+    const entry = `${time} - ${k}\n`;
+    logData += entry;
+    logDiv.textContent += entry;
+    logDiv.scrollTop = logDiv.scrollHeight;
+    highlightKey(e.key);
+  });
+
+  document.addEventListener("keyup", e => {
+    unhighlightKey(e.key);
+  });
+
+  downloadBtn.addEventListener("click", () => {
+    const blob = new Blob([logData], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `session_log_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+</script>
+
+</body>
+</html>

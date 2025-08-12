@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Delete the File Puzzle</title>
+  <style>
+    body {
+      background: #000;
+      color: #39ff14;
+      font-family: monospace;
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .boss-msg {
+      background: #000;
+      border-radius: 18px;
+      box-shadow: 0 0 18px #39ff14;
+      padding: 22px 32px;
+      color: #39ff14;
+      font-size: 1.15em;
+      margin-bottom: 32px;
+      max-width: 480px;
+      text-align: left;
+      position: relative;
+    }
+    .boss-msg:before {
+      content: 'Boss';
+      position: absolute;
+      top: -28px;
+      left: 12px;
+      color: #0f0;
+      font-weight: bold;
+      font-size: 1em;
+      background: #000;
+      border-radius: 8px;
+      padding: 2px 10px;
+      box-shadow: 0 0 8px #39ff14;
+    }
+    .desktop {
+      background: #000;
+      border-radius: 18px;
+      box-shadow: 0 0 24px #39ff14;
+      padding: 40px 0 0 0;
+      width: 600px;
+      height: 340px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+    #file {
+      width: 120px;
+      height: 120px;
+      background: #222;
+      border: 2px solid #39ff14;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2em;
+      color: #39ff14;
+      box-shadow: 0 0 18px #39ff14;
+      cursor: grab;
+      position: absolute;
+      left: 60px;
+      bottom: 80px;
+      user-select: none;
+      z-index: 2;
+    }
+    #trash {
+      width: 120px;
+      height: 120px;
+      background: #222;
+      border: 2px solid #39ff14;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5em;
+      color: #39ff14;
+      box-shadow: 0 0 18px #39ff14;
+      position: absolute;
+      right: 60px;
+      bottom: 80px;
+      z-index: 2;
+    }
+    .desktop-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      height: 48px;
+      background: #222;
+      border-bottom: 2px solid #39ff14;
+      border-radius: 18px 18px 0 0;
+      display: flex;
+      align-items: center;
+      color: #39ff14;
+      font-size: 1.2em;
+      letter-spacing: 1px;
+      box-shadow: 0 0 8px #39ff14;
+    }
+  </style>
+</head>
+<body>
+  <div class="boss-msg">
+    You gotta start deleting things the right way. Last time you left me with so much work so we gotta focus on the right buttons for now on. Please delete the file right this time!
+  </div>
+  <div class="desktop">
+    <div class="desktop-bar"> Desktop Environment</div>
+    <div id="file">📄<br>file.txt</div>
+    <div id="trash">🗑️</div>
+  </div>
+  <div id="logoutMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  <script>
+    const file = document.getElementById('file');
+    const trash = document.getElementById('trash');
+    let dragging = false;
+    let dragType = null;
+    let offsetX = 0, offsetY = 0;
+    // Right click drag
+    file.addEventListener('mousedown', function(e) {
+      if (e.button === 2) {
+        dragging = true;
+        dragType = 'right';
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        file.style.cursor = 'grabbing';
+        e.preventDefault();
+      } else if (e.button === 0) {
+        dragging = true;
+        dragType = 'left';
+        offsetX = e.offsetX;
+        offsetY = e.offsetY;
+        file.style.cursor = 'grabbing';
+      }
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (dragging) {
+        // Restrict movement inside desktop
+        const desktop = document.querySelector('.desktop');
+        const rect = desktop.getBoundingClientRect();
+        let x = e.clientX - rect.left - offsetX;
+        let y = e.clientY - rect.top - offsetY;
+        x = Math.max(0, Math.min(x, rect.width - file.offsetWidth));
+        y = Math.max(38, Math.min(y, rect.height - file.offsetHeight));
+        file.style.left = (x + rect.left - desktop.offsetLeft) + 'px';
+        file.style.top = (y + rect.top - desktop.offsetTop) + 'px';
+      }
+    });
+    document.addEventListener('mouseup', function(e) {
+      if (dragging) {
+        dragging = false;
+        file.style.cursor = 'grab';
+        // Check if over trash
+        const fileRect = file.getBoundingClientRect();
+        const trashRect = trash.getBoundingClientRect();
+        const overTrash = (
+          fileRect.right > trashRect.left &&
+          fileRect.left < trashRect.right &&
+          fileRect.bottom > trashRect.top &&
+          fileRect.top < trashRect.bottom
+        );
+        if (overTrash) {
+          if (dragType === 'right') {
+            window.location.href = '9math.html';
+          } else if (dragType === 'left') {
+            document.getElementById('logoutMsg').style.display = '';
+            setTimeout(function() {
+              window.location.href = '../main.html';
+            }, 5000);
+          }
+        }
+        dragType = null;
+      }
+    });
+    // Prevent context menu on right click
+    file.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>

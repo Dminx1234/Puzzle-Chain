@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Puzzle 5: Dropdown Challenge</title>
+  <style>
+    body {
+      background: #000;
+      color: #39ff14;
+      font-family: monospace;
+      height: 100vh;
+      margin: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .gear {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      width: 60px;
+      height: 60px;
+      background: #222;
+      border-radius: 50%;
+      box-shadow: 0 0 18px #39ff14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+    .gear.flipped {
+      background: #39ff14;
+      box-shadow: 0 0 18px #222;
+    }
+    .gear.flipped:after {
+      color: #222;
+      text-shadow: 0 0 10px #222;
+    }
+    .gear:after {
+      content: '\2699';
+      font-size: 2.5em;
+      color: #39ff14;
+      text-shadow: 0 0 10px #39ff14;
+    }
+    .dropdown {
+      position: absolute;
+      background: #111;
+      border: 2px solid #39ff14;
+      border-radius: 8px;
+      box-shadow: 0 0 18px #39ff14;
+      min-width: 220px;
+      padding: 0;
+      z-index: 20;
+      display: none;
+    }
+    .dropdown.show {
+      display: block;
+    }
+    .dropdown-option {
+      padding: 18px 32px;
+      font-size: 1.3em;
+      color: #39ff14;
+      background: #111;
+      border-bottom: 1px solid #222;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .dropdown-option:last-child {
+      border-bottom: none;
+    }
+    .dropdown-option:hover {
+      background: #39ff14;
+      color: #000;
+    }
+    .hidden-btn {
+      display: block;
+      margin: 40px auto 0 auto;
+      font-size: 2em;
+      background: #39ff14;
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 18px 60px;
+      box-shadow: 0 0 18px #39ff14;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.2s, color 0.2s;
+    }
+    .hidden-btn:hover {
+      background: #0f0;
+      color: #000;
+    }
+    .overlay {
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      z-index: 5;
+    }
+  </style>
+</head>
+<body>
+  <div class="gear" id="gearIcon"></div>
+  <div id="dropdowns"></div>
+  <script>
+    const gearIcon = document.getElementById('gearIcon');
+    const dropdownsDiv = document.getElementById('dropdowns');
+    let showHidden = false;
+    let dropdownCount = 5;
+    let currentDropdown = 0;
+
+    // Random option generator
+    function getRandomOptions(n) {
+      const pool = [
+        "Logout", "Restart", "Give Up", "Move On", "See More Options", "Try Again", "Mystery", "Continue", "Back", "Forward", "Hint", "Skip", "Retry", "Help", "Confuse", "Surprise", "Puzzle", "Choice", "Option", "Select", "Pick", "Random", "Test", "Next", "Previous"
+      ];
+      let arr = [];
+      while (arr.length < n) {
+        let opt = pool[Math.floor(Math.random() * pool.length)];
+        if (!arr.includes(opt)) arr.push(opt);
+      }
+      return arr;
+    }
+
+    function renderDropdown(level) {
+      // Remove all dropdowns after this level
+      while (dropdownsDiv.children.length > level) {
+        dropdownsDiv.removeChild(dropdownsDiv.lastChild);
+      }
+      // Create dropdown
+      const dropdown = document.createElement('div');
+      dropdown.className = 'dropdown show';
+      dropdown.style.position = 'absolute';
+      // Random position within viewport, avoid edges
+      const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+      const vh = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+      const minX = 40, minY = 40, maxX = vw - 260, maxY = vh - 180;
+      const randX = Math.floor(Math.random() * (maxX - minX) + minX);
+      const randY = Math.floor(Math.random() * (maxY - minY) + minY);
+      dropdown.style.left = `${randX}px`;
+      dropdown.style.top = `${randY}px`;
+      dropdown.style.transform = '';
+      // Options
+      let opts = getRandomOptions(4); // 4 random, 1 fixed
+      let moreLabel = "Show more options...";
+      if (level === 1) moreLabel = "Show even more options...";
+      if (level === 2) moreLabel = "Show even even more options...";
+      if (level === 3) moreLabel = "Show even even even more options...";
+      if (level === 4) moreLabel = "Show even even even even more options...";
+      if (level === dropdownCount - 1 && showHidden) {
+        opts.push("Solve Puzzle");
+      } else {
+        opts.push(moreLabel);
+      }
+      opts.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'dropdown-option';
+        div.textContent = opt;
+        div.dataset.idx = i;
+        dropdown.appendChild(div);
+      });
+      dropdownsDiv.appendChild(dropdown);
+
+      dropdown.addEventListener('click', function(e) {
+        if (!e.target.classList.contains('dropdown-option')) return;
+        const idx = parseInt(e.target.dataset.idx);
+        if (level === dropdownCount - 1 && showHidden && opts[idx] === "Solve Puzzle") {
+          window.location.href = '6translation.html';
+        } else if (idx === opts.length - 1 && level < dropdownCount - 1) {
+          renderDropdown(level + 1);
+        } else {
+          window.location.href = '../main.html';
+        }
+      });
+    }
+
+    // Initial render
+    renderDropdown(0);
+
+    // Gear toggles Show Hidden
+    gearIcon.addEventListener('click', function() {
+      showHidden = !showHidden;
+      gearIcon.classList.toggle('flipped');
+      // If already at last dropdown, re-render it to show/hide Solve Puzzle
+      if (dropdownsDiv.children.length === dropdownCount) {
+        renderDropdown(dropdownsDiv.children.length - 1);
+      }
+    });
+
+    // Hide all dropdowns if user clicks outside
+    document.body.addEventListener('click', function(e) {
+      if (!dropdownsDiv.contains(e.target) && e.target !== gearIcon) {
+        while (dropdownsDiv.firstChild) dropdownsDiv.removeChild(dropdownsDiv.firstChild);
+        renderDropdown(0);
+      }
+    });
+  </script>
+</body>
+</html>

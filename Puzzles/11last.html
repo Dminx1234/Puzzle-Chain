@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>About Me - Example Person</title>
+  <style>
+    body {
+      background: #000;
+      color: #39ff14;
+      font-family: 'Fira Mono', 'Consolas', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .about-container {
+      background: rgba(0,0,0,0.85);
+      border-radius: 24px;
+      box-shadow: 0 0 32px #39ff14, 0 0 8px #0f0 inset;
+      padding: 40px 32px 32px 32px;
+      max-width: 420px;
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeIn 1.2s;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    .avatar {
+      width: 96px;
+      height: 96px;
+      border-radius: 50%;
+      margin-bottom: 18px;
+      box-shadow: 0 0 18px #39ff14;
+      object-fit: cover;
+      background: #222;
+    }
+    .name {
+      font-size: 2.2em;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #39ff14;
+      text-shadow: 0 0 12px #39ff14;
+    }
+    .bio {
+      font-size: 1.1em;
+      color: #baffc9;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .links {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px 18px;
+      margin-bottom: 18px;
+    }
+    .link-btn {
+      background: #39ff14;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 18px;
+      font-size: 1em;
+      cursor: pointer;
+      box-shadow: 0 0 8px #39ff14;
+      transition: background 0.2s, color 0.2s;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .link-btn:hover {
+      background: #0f0;
+      color: #222;
+    }
+    .play-again {
+      margin-top: 18px;
+      font-size: 1.1em;
+      background: #39ff14;
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 28px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #39ff14;
+      transition: background 0.2s;
+      font-weight: bold;
+    }
+    .play-again:hover {
+      background: #0f0;
+    }
+    /* Particle background styles */
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .project-card {
+      position: absolute;
+      width: 260px;
+      background: rgba(0,0,0,0.85);
+      border-radius: 18px;
+      box-shadow: 0 0 18px #39ff14, 0 0 4px #0f0 inset;
+      padding: 18px 16px 16px 16px;
+      text-align: center;
+      z-index: 2;
+      cursor: grab;
+      user-select: none;
+      transition: box-shadow 0.2s;
+      animation: fadeIn 1.2s;
+    }
+    .project-card:active {
+      box-shadow: 0 0 32px #39ff14, 0 0 8px #0f0 inset;
+      cursor: grabbing;
+    }
+    .card-img {
+      width: 96px;
+      height: 96px;
+      border-radius: 12px;
+      margin: 0 auto 12px auto;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 12px #39ff14;
+      background-color: #222;
+    }
+    .card-title {
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #39ff14;
+      margin-bottom: 6px;
+      text-shadow: 0 0 8px #39ff14;
+    }
+    .card-desc {
+      font-size: 1em;
+      color: #baffc9;
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .card-link {
+      display: inline-block;
+      background: #39ff14;
+      color: #000;
+      border-radius: 6px;
+      padding: 7px 18px;
+      font-size: 1em;
+      font-weight: bold;
+      text-decoration: none;
+      box-shadow: 0 0 8px #39ff14;
+      transition: background 0.2s, color 0.2s;
+      margin-top: 4px;
+    }
+    .card-link:hover {
+      background: #0f0;
+      color: #222;
+    }
+    .drag-tooltip {
+      position: fixed;
+      top: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.85);
+      color: #39ff14;
+      font-size: 1.15em;
+      padding: 12px 28px;
+      border-radius: 16px;
+      box-shadow: 0 0 18px #39ff14;
+      z-index: 100;
+      pointer-events: none;
+      animation: none;
+      opacity: 1;
+      transition: opacity 1.2s;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bgCanvas"></canvas>
+  <div class="about-container">
+    <img class="avatar" src="../images/me.jpg" alt="Avatar">
+    <div class="name">Dominic</div>
+    <div class="bio">Hi! I'm Dominic (Dminx), a passionate web developer and puzzle enthusiast. I love creating interactive experiences, learning new technologies, and connecting with creative minds. Let's build something amazing together!</div>
+    <div class="links">
+      <a class="link-btn" href="mailto:AscendentDevelopment@gmail.com">Email</a>
+      <a class="link-btn" href="https://github.com/Dminx1234" target="_blank">GitHub</a>
+      <a class="link-btn" href="https://www.instagram.com/dom_dionne_/" target="_blank">Instagram</a>
+      <a class="link-btn" href="https://www.linkedin.com/in/dominic-dionne" target="_blank">LinkedIn</a>
+      <a class="link-btn" href="https://www.youtube.com/@dminx355" target="_blank">YouTube</a>
+    </div>
+    
+  </div>
+  <div class="project-card" id="card1">
+    <div class="card-img" style="background-image:url('https://via.placeholder.com/96x96?text=Game');"></div>
+    <div class="card-title">Galactic Defender</div>
+    <div class="card-desc">A space shooter game in development. Defend the galaxy from waves of enemies! (Image coming soon)</div>
+    <span class="card-link" style="cursor:default;">Coming soon</span>
+  </div>
+  <div class="project-card" id="card2">
+    <div class="card-img" style="background-image:url('https://via.placeholder.com/96x96?text=App');"></div>
+    <div class="card-title">TaskMaster App</div>
+    <div class="card-desc">A productivity app to organize your daily tasks and boost efficiency. (Image coming soon)</div>
+    <span class="card-link" style="cursor:default;">Coming soon</span>
+  </div>
+  <div class="project-card" id="card3">
+    <div class="card-img" style="background-image:url('../images/card3screenshot.png');"></div>
+    <div class="card-title">Puzzle Chain</div>
+    <div class="card-desc">A chain of interactive puzzles designed to challenge and demonstrate abstract solutions.</div>
+    <a class="card-link" href="../main.html">Play Now!</a>
+  </div>
+  <div class="drag-tooltip" id="dragTip">💡 Tip: You can click and drag the cards!</div>
+  <script>
+    // Calm green glow background
+    const canvas = document.getElementById('bgCanvas');
+    const ctx = canvas.getContext('2d');
+    let w = window.innerWidth;
+    let h = window.innerHeight;
+    function resizeCanvas() {
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
+      drawGlow();
+    }
+    function drawGlow() {
+      ctx.clearRect(0, 0, w, h);
+      // Large radial gradient for green glow
+      let grad = ctx.createRadialGradient(w/2, h/2, Math.min(w,h)/8, w/2, h/2, Math.max(w,h)/1.2);
+      grad.addColorStop(0, 'rgba(57,255,20,0.18)');
+      grad.addColorStop(0.5, 'rgba(57,255,20,0.09)');
+      grad.addColorStop(1, 'rgba(57,255,20,0.01)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    // Make about-container draggable
+    const about = document.querySelector('.about-container');
+    let isDragging = false;
+    let dragOffsetX = 0, dragOffsetY = 0;
+    about.style.position = 'absolute';
+    about.style.left = `calc(50% - ${about.offsetWidth/2}px)`;
+    about.style.top = `calc(50% - ${about.offsetHeight/2}px)`;
+    about.addEventListener('mousedown', function(e) {
+      isDragging = true;
+      dragOffsetX = e.clientX - about.offsetLeft;
+      dragOffsetY = e.clientY - about.offsetTop;
+      about.style.transition = 'none';
+      document.body.style.userSelect = 'none';
+    });
+    document.addEventListener('mousemove', function(e) {
+      if (isDragging) {
+        about.style.left = (e.clientX - dragOffsetX) + 'px';
+        about.style.top = (e.clientY - dragOffsetY) + 'px';
+      }
+    });
+    document.addEventListener('mouseup', function() {
+      isDragging = false;
+      about.style.transition = '';
+      document.body.style.userSelect = '';
+    });
+    // Helper for draggable cards
+    function makeDraggable(card, left, top) {
+      card.style.position = 'absolute';
+      card.style.left = left + 'px';
+      card.style.top = top + 'px';
+      let isDragging = false;
+      let dragOffsetX = 0, dragOffsetY = 0;
+      card.addEventListener('mousedown', function(e) {
+        isDragging = true;
+        dragOffsetX = e.clientX - card.offsetLeft;
+        dragOffsetY = e.clientY - card.offsetTop;
+        card.style.transition = 'none';
+        document.body.style.userSelect = 'none';
+        card.style.zIndex = 10;
+      });
+      document.addEventListener('mousemove', function(e) {
+        if (isDragging) {
+          card.style.left = (e.clientX - dragOffsetX) + 'px';
+          card.style.top = (e.clientY - dragOffsetY) + 'px';
+        }
+      });
+      document.addEventListener('mouseup', function() {
+        isDragging = false;
+        card.style.transition = '';
+        document.body.style.userSelect = '';
+        card.style.zIndex = 2;
+      });
+    }
+    // Position cards around the about card
+    function centerAbout() {
+      about.style.position = 'absolute';
+      about.style.left = `calc(50% - ${about.offsetWidth/2}px)`;
+      about.style.top = `calc(50% - ${about.offsetHeight/2}px)`;
+    }
+    centerAbout();
+    // Place project cards
+    const card1 = document.getElementById('card1');
+    const card2 = document.getElementById('card2');
+    const card3 = document.getElementById('card3');
+    // Initial positions (relative to center, spaced further from about card)
+    makeDraggable(card1, window.innerWidth/2 - 560, window.innerHeight/2 - 220);
+    makeDraggable(card2, window.innerWidth/2 + 320, window.innerHeight/2 - 220);
+    makeDraggable(card3, window.innerWidth/2 - 50, window.innerHeight/2 + 320);
+    // Make about card draggable too
+    makeDraggable(about, about.offsetLeft, about.offsetTop);
+    window.addEventListener('resize', () => {
+      centerAbout();
+    });
+    // Tooltip fade out after 4 seconds
+    const dragTip = document.getElementById('dragTip');
+    dragTip.style.opacity = '1';
+    setTimeout(() => {
+      dragTip.style.opacity = '0';
+    }, 4000);
+  </script>
+</body>
+</html>
