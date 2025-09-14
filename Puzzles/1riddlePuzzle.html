@@ -46,14 +46,57 @@
 </head>
 <body>
   <div class="riddle-container">
-    <div class="riddle-question">I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?</div>
-    <button class="riddle-choice" onclick="wrong()">A Tree</button>
-    <button class="riddle-choice" onclick="wrong()">A Cloud</button>
-    <button class="riddle-choice" onclick="right()">An Echo</button>
-    <button class="riddle-choice" onclick="wrong()">A Shadow</button>
+    <div class="riddle-question" id="riddleQuestion"></div>
+    <div id="choices"></div>
     <div id="errorMsg" style="display:none; color:red; font-size:2.5em; font-weight:bold; margin-top:40px; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
   </div>
   <script>
+    const riddles = [
+      {
+        question: "I speak without a mouth and hear without ears. During the dark I can't see. What am I?",
+        answer: "An Eye",
+        choices: ["A Tree", "A Cloud", "A Shadow"]
+      },
+      {
+        question: "What has keys but can't open locks?",
+        answer: "A Piano",
+        choices: ["A Map", "A Door", "A River"]
+      },
+      {
+        question: "What can travel around the world while staying in a corner?",
+        answer: "A Stamp",
+        choices: ["A Shadow", "A Clock", "A Letter"]
+      },
+      {
+        question: "I am not alive, but I can die. What am I?",
+        answer: "A Battery",
+        choices: ["A Sponge", "A River", "A Cloud"]
+      }
+    ];
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function loadRiddle() {
+      const riddle = riddles[Math.floor(Math.random() * riddles.length)];
+      document.getElementById('riddleQuestion').textContent = riddle.question;
+      const allChoices = shuffle([riddle.answer, ...riddle.choices]);
+      const choicesDiv = document.getElementById('choices');
+      choicesDiv.innerHTML = '';
+      allChoices.forEach(choice => {
+        const btn = document.createElement('button');
+        btn.className = 'riddle-choice';
+        btn.textContent = choice;
+        btn.onclick = choice === riddle.answer ? right : wrong;
+        choicesDiv.appendChild(btn);
+      });
+    }
+
     function right() {
       window.location.href = "2buttonPress.html";
     }
@@ -63,6 +106,8 @@
         window.location.href = "../main.html";
       }, 5000);
     }
+
+    loadRiddle();
   </script>
 </body>
 </html>

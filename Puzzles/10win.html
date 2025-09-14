@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Survive the Spheres!</title>
@@ -16,6 +17,7 @@
       margin: 0;
       overflow: hidden;
     }
+
     .timer {
       font-size: 2em;
       color: #39ff14;
@@ -23,19 +25,25 @@
       margin-bottom: 16px;
       text-align: center;
     }
+
     canvas {
       position: fixed;
-      left: 0; top: 0;
-      width: 100vw; height: 100vh;
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
       pointer-events: none;
       z-index: 0;
     }
   </style>
 </head>
+
 <body>
   <div class="timer" id="timer">Survive: 30.0s</div>
   <canvas id="gameCanvas"></canvas>
-  <div id="logoutMsg" style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">Error: Security breach detected. Logging out...</div>
+  <div id="logoutMsg"
+    style="display:none; color:red; font-size:2.2em; font-weight:bold; margin-top:40px; text-align:center; text-shadow:0 0 10px #f00;">
+    Error: Security breach detected. Logging out...</div>
   <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
@@ -46,7 +54,7 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
     // Mouse tracking and green cursor
-    let mouse = { x: window.innerWidth/2, y: window.innerHeight/2 };
+    let mouse = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
     document.addEventListener('mousemove', e => {
       mouse.x = Math.max(0, Math.min(e.clientX, window.innerWidth));
       mouse.y = Math.max(0, Math.min(e.clientY, window.innerHeight));
@@ -62,16 +70,16 @@
     const trailLength = 18;
     function spawnSphere() {
       // Spawn at random edge
-      const edge = Math.floor(Math.random()*4);
+      const edge = Math.floor(Math.random() * 4);
       let x, y;
-      if (edge === 0) x = Math.random()*canvas.width, y = 0;
-      else if (edge === 1) x = canvas.width, y = Math.random()*canvas.height;
-      else if (edge === 2) x = Math.random()*canvas.width, y = canvas.height;
-      else x = 0, y = Math.random()*canvas.height;
+      if (edge === 0) x = Math.random() * canvas.width, y = 0;
+      else if (edge === 1) x = canvas.width, y = Math.random() * canvas.height;
+      else if (edge === 2) x = Math.random() * canvas.width, y = canvas.height;
+      else x = 0, y = Math.random() * canvas.height;
       spheres.push({
         x, y,
         vx: 0, vy: 0,
-        speed: 2.2 + Math.random()*1.2 + Math.random()*1.2, // Each sphere gets its own speed
+        speed: 2.2 + Math.random() * 1.2 + Math.random() * 1.2, // Each sphere gets its own speed
         trail: [],
         active: true,
         type: 'chase'
@@ -83,35 +91,35 @@
         // Random speed boost 0% to 40%
         const boost = 1 + Math.random() * 0.6;
         if (type === 'fall') {
-          x = Math.random() * (canvas.width - sphereRadius*2) + sphereRadius;
+          x = Math.random() * (canvas.width - sphereRadius * 2) + sphereRadius;
           y = -sphereRadius;
           vx = 0;
-          vy = (4.2 + Math.random()*1.2) * boost;
+          vy = (4.2 + Math.random() * 1.2) * boost;
           speed = vy;
         } else if (type === 'slide') {
           if (direction === 'right') {
             x = -sphereRadius;
-            y = Math.random() * (canvas.height - sphereRadius*2) + sphereRadius;
-            vx = (4.2 + Math.random()*1.2) * boost;
+            y = Math.random() * (canvas.height - sphereRadius * 2) + sphereRadius;
+            vx = (4.2 + Math.random() * 1.2) * boost;
             vy = 0;
             speed = vx;
           } else if (direction === 'left') {
             x = canvas.width + sphereRadius;
-            y = Math.random() * (canvas.height - sphereRadius*2) + sphereRadius;
-            vx = -((4.2 + Math.random()*1.2) * boost);
+            y = Math.random() * (canvas.height - sphereRadius * 2) + sphereRadius;
+            vx = -((4.2 + Math.random() * 1.2) * boost);
             vy = 0;
             speed = Math.abs(vx);
           } else if (direction === 'down') {
-            x = Math.random() * (canvas.width - sphereRadius*2) + sphereRadius;
+            x = Math.random() * (canvas.width - sphereRadius * 2) + sphereRadius;
             y = -sphereRadius;
             vx = 0;
-            vy = (4.2 + Math.random()*1.2) * boost;
+            vy = (4.2 + Math.random() * 1.2) * boost;
             speed = vy;
           } else if (direction === 'up') {
-            x = Math.random() * (canvas.width - sphereRadius*2) + sphereRadius;
+            x = Math.random() * (canvas.width - sphereRadius * 2) + sphereRadius;
             y = canvas.height + sphereRadius;
             vx = 0;
-            vy = -((4.2 + Math.random()*1.2) * boost);
+            vy = -((4.2 + Math.random() * 1.2) * boost);
             speed = Math.abs(vy);
           }
         }
@@ -127,7 +135,7 @@
       }
     }
     // Initial spheres
-    for (let i=0; i<3; i++) spawnSphere();
+    for (let i = 0; i < 3; i++) spawnSphere();
     // Spawn new spheres over time
     setInterval(() => { if (spheres.length < 12) spawnSphere(); }, 3500);
     // Spawn special spheres every 5 seconds
@@ -135,13 +143,13 @@
       // Randomly pick directions and counts
       const dirs = ['right', 'left', 'up', 'down'];
       // Pick two directions
-      let dir1 = dirs[Math.floor(Math.random()*dirs.length)];
+      let dir1 = dirs[Math.floor(Math.random() * dirs.length)];
       let dir2;
       do {
-        dir2 = dirs[Math.floor(Math.random()*dirs.length)];
+        dir2 = dirs[Math.floor(Math.random() * dirs.length)];
       } while (dir2 === dir1);
       // Random counts
-      let count1 = Math.floor(Math.random()*2)+2; // 2 or 3
+      let count1 = Math.floor(Math.random() * 2) + 2; // 2 or 3
       let count2 = 5 - count1;
       spawnSpecialSpheres('slide', dir1, count1);
       spawnSpecialSpheres('slide', dir2, count2);
@@ -153,9 +161,9 @@
       for (let i = 0; i < trail.length; i++) {
         const t = trail[i];
         ctx.save();
-        ctx.globalAlpha = 0.12 + 0.5 * (i/trail.length);
+        ctx.globalAlpha = 0.12 + 0.5 * (i / trail.length);
         ctx.beginPath();
-        ctx.arc(t.x, t.y, sphereRadius * (0.7 + 0.3*i/trail.length), 0, Math.PI*2);
+        ctx.arc(t.x, t.y, sphereRadius * (0.7 + 0.3 * i / trail.length), 0, Math.PI * 2);
         ctx.fillStyle = '#39ff14';
         ctx.shadowColor = '#39ff14';
         ctx.shadowBlur = 18;
@@ -170,7 +178,7 @@
         // Move toward mouse
         const dx = mouse.x - sphere.x;
         const dy = mouse.y - sphere.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
         const angle = Math.atan2(dy, dx);
         // Smooth velocity
         sphere.vx += Math.cos(angle) * sphere.speed * 0.18;
@@ -181,14 +189,14 @@
         sphere.x += sphere.vx;
         sphere.y += sphere.vy;
         // Trail
-        sphere.trail.push({x: sphere.x, y: sphere.y});
+        sphere.trail.push({ x: sphere.x, y: sphere.y });
         if (sphere.trail.length > trailLength) sphere.trail.shift();
         drawTrail(sphere.trail);
         // Draw sphere
         ctx.save();
         ctx.globalAlpha = 0.95;
         ctx.beginPath();
-        ctx.arc(sphere.x, sphere.y, sphereRadius, 0, Math.PI*2);
+        ctx.arc(sphere.x, sphere.y, sphereRadius, 0, Math.PI * 2);
         ctx.fillStyle = '#39ff14';
         ctx.shadowColor = '#39ff14';
         ctx.shadowBlur = 30;
@@ -206,14 +214,14 @@
         sphere.x += sphere.vx;
         sphere.y += sphere.vy;
         // Trail
-        sphere.trail.push({x: sphere.x, y: sphere.y});
+        sphere.trail.push({ x: sphere.x, y: sphere.y });
         if (sphere.trail.length > trailLength) sphere.trail.shift();
         drawTrail(sphere.trail);
         // Draw sphere
         ctx.save();
         ctx.globalAlpha = 0.95;
         ctx.beginPath();
-        ctx.arc(sphere.x, sphere.y, sphereRadius, 0, Math.PI*2);
+        ctx.arc(sphere.x, sphere.y, sphereRadius, 0, Math.PI * 2);
         ctx.fillStyle = '#39ff14';
         ctx.shadowColor = '#39ff14';
         ctx.shadowBlur = 30;
@@ -222,7 +230,7 @@
         // Collision with green cursor
         const dx = mouse.x - sphere.x;
         const dy = mouse.y - sphere.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
+        const dist = Math.sqrt(dx * dx + dy * dy);
         if (dist < sphereRadius + 14) {
           gameOver();
         }
@@ -250,18 +258,18 @@
     function win() {
       survived = true;
       document.getElementById('timer').textContent = 'You survived!';
-      setTimeout(() => window.location.href = '11last.html', 1800);
+      setTimeout(() => window.location.href = 'https://dminx1234.github.io/Portfolio/main.html', 1800);
     }
     let spawnedFall = false;
     let spawnedSlide = false;
     function animate(ts) {
       if (!startTime) startTime = ts;
-      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       // Draw green cursor
       ctx.save();
       ctx.globalAlpha = 0.95;
       ctx.beginPath();
-      ctx.arc(mouse.x, mouse.y, 14, 0, Math.PI*2);
+      ctx.arc(mouse.x, mouse.y, 14, 0, Math.PI * 2);
       ctx.fillStyle = '#39ff14';
       ctx.shadowColor = '#39ff14';
       ctx.shadowBlur = 18;
@@ -270,7 +278,7 @@
       drawSpheres();
       // Timer
       if (!survived) {
-        const elapsed = ((ts - startTime)/1000);
+        const elapsed = ((ts - startTime) / 1000);
         const left = Math.max(0, 30 - elapsed);
         document.getElementById('timer').textContent = `Survive: ${left.toFixed(1)}s`;
         if (!spawnedFall && left <= 10.0) {
@@ -288,4 +296,5 @@
     animate();
   </script>
 </body>
+
 </html>

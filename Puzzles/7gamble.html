@@ -66,8 +66,8 @@
     function weightedRandomChar(col) {
       const pool = 'abcdefghijklmnopqrstuvwxyz';
       const target = targetWord[col];
-      // 40% chance for target letter, 60% for random
-      if (Math.random() < 0.4) return target;
+      // 20% chance for target letter, 60% for random
+      if (Math.random() < 0.2) return target;
       let ch;
       do {
         ch = pool[Math.floor(Math.random()*pool.length)];
